@@ -50,7 +50,7 @@ def load_movies():
         if title_year == "Unknown".lower() or title_year == "":
             continue
 
-        title = title_year[:-7]
+        title = title_year[:-7].decode("latin-1")
         
         if released_str:
             released_at = datetime.strptime(released_str, "%d-%b-%Y")
