@@ -48,24 +48,49 @@ def register_process():
     user_name = request.form.get("email")
     password = request.form.get("password")
     check_user_in_db = User.query.filter(User.email == user_name).all()
-    if check_user_in_db:
-        return "You've already signed up!"
 
+    if check_user_in_db:
+        flash("You've already signed up!")
+        return redirect("/login")
     else:
         new_user = User(email=user_name, password=password) 
         db.session.add(new_user)
         db.session.commit()
+        flash("You have been registered successfully!")
         return redirect("/")
 
 @app.route('/login',methods=["GET"])
 def login_form():
     """ Render login form."""
 
-return render_template("login_form.html")
+    return render_template("login_form.html")
+
 
 @app.route('/login',methods=["POST"])
 def login_process():
-    """ """
+    """ Log the user in. """
+
+    user_name = request.form.get("email")
+    password = request.form.get("password")
+    verify_user_info = User.query.filter(User.email == user_name, User.password == password).all()
+
+    if verify_user_info:
+        session['user_id'] = verify_user_info[0].user_id
+        flash("Logged in as %s" % user_name)
+        return redirect("/")
+    else:
+        flash("Invalid email/password")
+        return redirect("/login")   
+
+@app.route('/logout')
+def logout():
+    if 'user_id' in session:
+        del session['user_id']
+        flash("Logged Out!") 
+        return redirect('/')   
+
+
+
 
 
 if __name__ == "__main__":
@@ -77,6 +102,7 @@ if __name__ == "__main__":
 
     # Use the DebugToolbar
     DebugToolbarExtension(app)
+    DEBUG_TB_INTERCEPT_REDIRECTS = False
 
 
     
