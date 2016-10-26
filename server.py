@@ -36,6 +36,17 @@ def user_list():
     users = User.query.all()
     return render_template("user_list.html", users=users)
 
+@app.route('/users/<int:user_id>')
+def show_user_page(user_id):
+
+    try:
+        user = User.query.filter(User.user_id == user_id).one()
+        ratings = Rating.query.filter(Rating.user_id == user_id).all()
+        return render_template("user.html",user=user, ratings=ratings)   
+    except NoResultFound:
+        flash("Nice try! User does not exist.")
+        redirect("/users")
+
 @app.route('/register',methods=["GET"])
 def register_form():
     """ Show the Sign-in form"""
