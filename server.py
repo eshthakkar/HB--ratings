@@ -8,6 +8,8 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from model import (connect_to_db, db, User, Rating, Movie)
 
+from sqlalchemy.orm.exc import NoResultFound
+
 
 app = Flask(__name__)
 
@@ -45,20 +47,30 @@ def register_form():
 def register_process():
     """ User added to database"""
 
+    print request.form
+
     user_name = request.form.get("email")
     password = request.form.get("password")
-    check_user_in_db = User.query.filter(User.email == user_name).all()
+    age = request.form.get("age")
+    if not age:
+        age = None
+    zipcode = request.form.get("zipcode")
+    if zipcode == "":
+        zipcode = None
+    check_user_in_db_query = User.query.filter(User.email == user_name)
 
-    if check_user_in_db:
+    try:
+        check_user_in_db_query.one()
         flash("You've already signed up!")
         return redirect("/login")
-    else:
-        new_user = User(email=user_name, password=password) 
+
+    except NoResultFound: 
+        new_user = User(email=user_name, password=password, age=age, zipcode=zipcode) 
         db.session.add(new_user)
         db.session.commit()
         flash("You have been registered successfully!")
         return redirect("/")
-
+        
 @app.route('/login',methods=["GET"])
 def login_form():
     """ Render login form."""
@@ -72,13 +84,13 @@ def login_process():
 
     user_name = request.form.get("email")
     password = request.form.get("password")
-    verify_user_info = User.query.filter(User.email == user_name, User.password == password).all()
+    verify_user_info = User.query.filter(User.email == user_name, User.password == password)
 
-    if verify_user_info:
-        session['user_id'] = verify_user_info[0].user_id
+    try: 
+        session['user_id'] = verify_user_info.one().user_id
         flash("Logged in as %s" % user_name)
         return redirect("/")
-    else:
+    except NoResultFound:
         flash("Invalid email/password")
         return redirect("/login")   
 
@@ -102,8 +114,6 @@ if __name__ == "__main__":
 
     # Use the DebugToolbar
     DebugToolbarExtension(app)
-    DEBUG_TB_INTERCEPT_REDIRECTS = False
-
 
     
     app.run(port=5000)
