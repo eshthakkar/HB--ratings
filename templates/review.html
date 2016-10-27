@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <h2> Add a rating</h2>
+    <form action="/review" method="POST">
+      <label>Select a rating: </label>
+        <select name="rating">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select><br> 
+        <input type="hidden" name="movie_id" value="{{ movie_id }}">  <input type="submit" value="Submit Rating!">
+    </form>
+
+{% endblock %}

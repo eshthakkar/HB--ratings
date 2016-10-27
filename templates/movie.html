@@ -2,6 +2,21 @@
 {% block content %}
 
     <h2>Movie Info</h2>
+    {% if check_if_rated is not none %}
+    <!-- Show update rating button if check_if_rated = True -->
+      <form action="/review">
+      <input type="hidden" name="movie_id" value="{{ movie.movie_id }}">
+      <input type="submit" value="Update rating">
+    </form> 
+  {% else %}  
+  <!-- Show add rating button if check_if_rated = False -->
+      <form action="/review">
+      <input type="hidden" name="movie_id" value="{{ movie.movie_id }}">
+      <input type="submit" value="Add rating">
+    </form> 
+  {% endif %} 
+ 
+    
     <ul>
       <li>Movie: <a href="{{ movie.imdb_url }}">{{ movie.title }}</a></li>
       <li>Released On: {{ movie.released_at.month }}-{{ movie.released_at.day }}-{{ movie.released_at.year }}</li>

@@ -60,7 +60,14 @@ def show_movie_page(movie_id):
 
     try:
         movie = Movie.query.filter(Movie.movie_id == movie_id).one()
-        return render_template("movie.html",movie=movie)   
+        check_if_rated = None
+        # If user logged
+        if 'user_id' in session:
+            try:
+                check_if_rated = Rating.query.filter(Rating.movie_id == movie_id,Rating.user_id == session['user_id']).one()
+            except NoResultFound:
+                pass
+        return render_template("movie.html",movie=movie,check_if_rated=check_if_rated)     
     except NoResultFound:
         flash("Nice try! Movie does not exist.")
         redirect("/movies")
@@ -132,7 +139,34 @@ def logout():
         flash("Logged Out!") 
         return redirect('/')   
 
+@app.route('/review',methods=["GET"])
+def show_review_form():
+    if 'user_id' in session:
+        movie_id = request.args.get("movie_id")
+        return render_template("review.html",movie_id=movie_id)
+    else:
+        flash("You must be logged in to rate a movie!")
+        return redirect('/login') 
 
+@app.route('/review',methods=["POST"])
+def process_review():
+    new_score = request.form.get("rating")
+    user_id = session['user_id']
+    movie_id = request.form.get("movie_id")
+
+    try:
+        rating = Rating.query.filter(Rating.movie_id == movie_id, Rating.user_id == session['user_id']).one()
+        rating.score = new_score
+        db.session.commit()
+        flash("Your rating has been updated successfully")
+
+    except NoResultFound:
+        new_review = Rating(user_id=int(user_id), movie_id=int(movie_id), score=int(new_score)) 
+        db.session.add(new_review)
+        db.session.commit()
+        flash("Your rating has been added successfully!")
+    
+    return redirect("/movies/" + movie_id)
 
 
 
