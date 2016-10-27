@@ -5,15 +5,26 @@
     <ul>
       <li>Age: {{ user.age }}</li>
       <li>Zipcode: {{ user.zipcode }}</li>
-      <li> Ratings: </li>
+      {% if user.ratings %}
 
-          <!-- {% for rating in ratings %}
-              <li>
-                  <a href="/users/{{ user.user_id }}">
-                    {{ user.email }} ({{ user.user_id }})
-                  </a>
-              </li>
-          {% endfor %} -->
+        <h3>Ratings: </h3><br>
+          <table>
+            <tr>
+              <th>Movie title</th>
+              <th>Rating</th>
+            </tr>
+          {% for rating in user.ratings %}
+            <tr>
+              <td><a href="{{rating.movie_info.imdb_url}}">{{ rating.movie_info.title }}</a></td>
+              <td>{{ rating.score }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+        
+      {% else %}
+        <p>You have not rated any movies yet!</p> 
+      {% endif %}   
+      
     </ul>
 
 {% endblock %}

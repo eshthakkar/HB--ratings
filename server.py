@@ -36,16 +36,35 @@ def user_list():
     users = User.query.all()
     return render_template("user_list.html", users=users)
 
+@app.route('/movies')
+def movie_list():
+    """Show list of movies."""
+
+    movies = Movie.query.order_by('title').all()
+    return render_template("movie_list.html", movies=movies)
+
+
 @app.route('/users/<int:user_id>')
 def show_user_page(user_id):
 
     try:
         user = User.query.filter(User.user_id == user_id).one()
-        ratings = Rating.query.filter(Rating.user_id == user_id).all()
-        return render_template("user.html",user=user, ratings=ratings)   
+        return render_template("user.html",user=user)   
     except NoResultFound:
         flash("Nice try! User does not exist.")
         redirect("/users")
+
+
+@app.route('/movies/<int:movie_id>')
+def show_movie_page(movie_id):
+
+    try:
+        movie = Movie.query.filter(Movie.movie_id == movie_id).one()
+        return render_template("movie.html",movie=movie)   
+    except NoResultFound:
+        flash("Nice try! Movie does not exist.")
+        redirect("/movies")
+
 
 @app.route('/register',methods=["GET"])
 def register_form():
@@ -82,6 +101,7 @@ def register_process():
         flash("You have been registered successfully!")
         return redirect("/")
         
+
 @app.route('/login',methods=["GET"])
 def login_form():
     """ Render login form."""
@@ -100,7 +120,7 @@ def login_process():
     try: 
         session['user_id'] = verify_user_info.one().user_id
         flash("Logged in as %s" % user_name)
-        return redirect("/")
+        return redirect("/users/" + str(session['user_id']))
     except NoResultFound:
         flash("Invalid email/password")
         return redirect("/login")   
